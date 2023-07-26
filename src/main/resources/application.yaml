@@ -1,0 +1,14 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          cognito:
+            clientId: ${AWS_COGNITO_CLIENT_ID}
+            clientSecret: ${AWS_COGNITO_CLIENT_SECRET}
+            scope: openid
+            redirect-uri: ${AWS_COGNITO_REDIRECT_URI}
+            clientName: chat-app
+        provider:
+          cognito:
+            issuerUri: ${AWS_COGNITO_URI}

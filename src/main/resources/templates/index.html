@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head th:replace=" ~{fragments/head :: head (title='Home' )}">
+</head>
+
+<body>
+    <div class="page">
+        <header th:replace="~{fragments/header :: header}">
+        </header>
+        <div class="page-wrapper">
+            <div class="page-body container">
+                <div class="p-5 mb-4 bg-body-tertiary rounded-3">
+                    <div class="container-fluid py-5">
+                        <h1 class="display-5 fw-bold">Connect, Communicate, and Collaborate </h1>
+                        <p class="col-md-8 home-description">
+                            Join a vibrant network of like-minded individuals, where you can create or join diverse chat
+                            channels tailored to your interests. Engage in real-time conversations, share ideas, and
+                            build lasting connections with people from around the world.
+                        </p>
+                        <p class="col-md-8 home-description">
+                            Sign up now and unlock a world of connection and collaboration. Together, let's chat,
+                            create, and make a difference!
+                        </p>
+                        <a sec:authorize="isAuthenticated()" href="/chat" class="btn btn-primary btn-lg open-sans">Get
+                            started</a>
+                        <a sec:authorize="!isAuthenticated()" href="/oauth2/authorization/cognito"
+                            class="btn btn-primary btn-lg open-sans">Get
+                            started</a>
+                    </div>
+                </div>
+                <div class="overflow-hidden" style="max-height: 60vh;">
+                    <div class="container px-5">
+                        <img src="/screenshot.png" class="img-fluid border rounded-3 shadow-lg mb-4" alt="Example image"
+                            width="1000" height="700" loading="lazy">
+                    </div>
+                </div>
+
+                <div class="row align-items-md-stretch">
+                    <div class="col-md-6">
+                        <div class="h-100 p-5 text-bg-dark rounded-3">
+                            <h2>Key Features</h2>
+                            <ul class="home-description">
+                                <li>
+                                    Create and customize your own chat servers to bring together friends, colleagues, or
+                                    communities.
+                                </li>
+                                <li>
+                                    Join existing servers and explore a multitude of topics, from gaming and hobbies to
+                                    technology and art
+                                </li>
+                                <li>
+                                    Share files and images effortlessly.
+                                </li>
+                                <li>
+                                    Receive instant notifications to never miss out on important messages
+                                </li>
+                            </ul>
+                            <a class="btn btn-outline-light open-sans" href="/signin">Start exploring</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+                            <h2>Our vision</h2>
+                            <p class="home-description">Seamless communication, community building, collaboration and
+                                productivity</p>
+                            <p class="home-description">We believe in empowering communities and fostering meaningful
+                                interactions. Whether you're a gamer, artist, student, or professional, here is the
+                                place where your conversations thrive. </p>
+                            <a sec:authorize="isAuthenticated()" href="/chat"
+                                class="btn btn-outline open-sans mt-2">Start exploring</a>
+                            <a sec:authorize="!isAuthenticated()" href="/oauth2/authorization/cognito"
+                                class="btn btn-outline open-sans mt-2">Start exploring</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
+</body>
+
+</html>
