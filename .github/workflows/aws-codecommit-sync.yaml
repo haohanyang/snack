@@ -1,0 +1,35 @@
+name: Synchronize to AWS CodeCommit
+
+on:
+  push:
+    tags-ignore:
+      - '*'
+    branches:
+      - '*'
+
+permissions:
+      id-token: write
+      contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_CODECOMMIT_CONTRIBUTION_ROLE }}
+          aws-region: eu-north-1
+
+      - name: Sync up to CodeCommit
+        run: |
+            git config --global --add safe.directory /github/workspace
+            git config --global credential.'https://git-codecommit.*.amazonaws.com'.helper '!aws codecommit credential-helper $@'
+            git config --global credential.UseHttpPath true
+            git remote add sync https://git-codecommit.eu-north-1.amazonaws.com/v1/repos/snack
+            git push sync --mirror
