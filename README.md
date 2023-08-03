@@ -20,3 +20,13 @@ S3 integration and AWS CloudFront for fast content delivering.
 
 **RTK Query** The front-end largely uses [RTK Query](https://redux-toolkit.js.org/rtk-query/overview) for simplified
 data fetching and caching.
+
+## Deployment
+Build the docker image 
+```
+docker build -t snack-app:v1 .
+```
+In runtime, the app requires a property file `application-deploy.properties` with secrets to be mounted to the container.
+```
+docker run -it -d --name snack-app-container --mount type=bind,source=/path/to/application-deploy.properties,target=/app/application-deploy.properties -p 8080:8080 snakc-app:v1
+```

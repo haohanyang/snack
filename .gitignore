@@ -74,3 +74,5 @@ src/main/resources/static/favicon.ico
 src/main/resources/static/site.webmanifest
 
 __pycache__/
+
+application-deploy.properties

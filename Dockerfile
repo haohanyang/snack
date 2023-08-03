@@ -21,4 +21,8 @@ WORKDIR /app
 
 COPY --from=builder /home/app/app.jar app.jar
 
-CMD [ "java", "-jar", "app.jar" ]
+COPY start.sh start.sh
+
+EXPOSE 8080
+
+ENTRYPOINT [ "sh", "start.sh"]
