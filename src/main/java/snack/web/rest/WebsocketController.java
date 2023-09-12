@@ -7,7 +7,6 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 
 import java.security.Principal;
 
-// @Controller
 public class WebsocketController {
     private final Logger logger = LoggerFactory.getLogger(WebsocketController.class);
 

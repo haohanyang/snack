@@ -40,7 +40,7 @@ public class StorageServiceImpl implements StorageService {
                 .metadata("uploader", userId)
                 .build());
         return new FileUploadResult(
-            getDownloadUrl(key),
+            getDownloadUrl(bucket, key),
             bucket,
             key,
             file.getOriginalFilename(),
@@ -58,7 +58,7 @@ public class StorageServiceImpl implements StorageService {
             throw new IllegalArgumentException("User doesn't match");
         }
         return new FileUploadResult(
-            getDownloadUrl(result.key()),
+            getDownloadUrl(result.bucket(), result.key()),
             result.bucket(),
             result.key(),
             result.fileName(),
@@ -68,7 +68,7 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String getDownloadUrl(String key) {
+    public String getDownloadUrl(String bucket, String key) {
         return "https://" + cloudFrontDomain + "/" + key;
     }
 }

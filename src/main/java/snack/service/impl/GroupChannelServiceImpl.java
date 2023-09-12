@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import snack.domain.channel.GroupChannel;
 import snack.domain.channel.GroupChannelMembership;
 import snack.domain.message.GroupChannelMessage;
-import snack.domain.user.User;
 import snack.repository.channel.GroupChannelMembershipRepository;
 import snack.repository.channel.GroupChannelRepository;
 import snack.repository.channel.UserChannelRepository;
@@ -21,7 +20,6 @@ import snack.repository.user.UserRepository;
 import snack.service.GroupChannelService;
 import snack.service.dto.GroupChannelDto;
 import snack.service.dto.MembershipDto;
-import snack.service.dto.UserDto;
 import snack.service.exception.ChannelNotFoundException;
 import snack.service.exception.InvalidUserException;
 import snack.service.exception.UserNotFoundException;
@@ -37,10 +35,10 @@ public class GroupChannelServiceImpl implements GroupChannelService {
     private final StorageService storageService;
 
     public GroupChannelServiceImpl(UserRepository userRepository, UserChannelRepository userChannelRepository,
-                                   GroupChannelRepository groupChannelRepository,
-                                   GroupChannelMembershipRepository groupChannelMembershipRepository,
-                                   GroupMessageRepository groupMessageRepository,
-                                   StorageService storageService) {
+            GroupChannelRepository groupChannelRepository,
+            GroupChannelMembershipRepository groupChannelMembershipRepository,
+            GroupMessageRepository groupMessageRepository,
+            StorageService storageService) {
         this.userRepository = userRepository;
         this.groupChannelRepository = groupChannelRepository;
         this.groupChannelMembershipRepository = groupChannelMembershipRepository;
@@ -52,9 +50,9 @@ public class GroupChannelServiceImpl implements GroupChannelService {
     @Transactional(readOnly = true)
     public GroupChannelDto getChannel(Integer id) throws ChannelNotFoundException {
         var groupChannel = groupChannelRepository.findById(id)
-            .orElseThrow(() -> new ChannelNotFoundException(id));
+                .orElseThrow(() -> new ChannelNotFoundException(id));
         var lastMessage = groupMessageRepository.findFirstByChannelOrderByCreatedAtDesc(groupChannel)
-            .orElse(null);
+                .orElse(null);
         var memberIds = groupChannelMembershipRepository.getMemberIds(id);
         return groupChannel.toDto(storageService, lastMessage, memberIds.size());
     }
@@ -62,7 +60,7 @@ public class GroupChannelServiceImpl implements GroupChannelService {
     @Override
     @Transactional
     public GroupChannelDto createChannel(GroupChannelRequest request)
-        throws InvalidUserException {
+            throws InvalidUserException {
 
         var creatorId = request.creatorId();
         var memberIds = new HashSet<>(request.memberIds());
@@ -70,7 +68,7 @@ public class GroupChannelServiceImpl implements GroupChannelService {
         memberIds.remove(creatorId);
 
         var creator = userRepository.findById(creatorId)
-            .orElseThrow(() -> new InvalidUserException(request.creatorId()));
+                .orElseThrow(() -> new InvalidUserException(request.creatorId()));
         var groupChannel = new GroupChannel(request.name(), request.description());
         groupChannelRepository.save(groupChannel);
 
@@ -78,7 +76,7 @@ public class GroupChannelServiceImpl implements GroupChannelService {
         memberships.add(new GroupChannelMembership(creator, groupChannel, true));
         for (var userId : memberIds) {
             var member = userRepository.findById(userId)
-                .orElseThrow(() -> new InvalidUserException(userId));
+                    .orElseThrow(() -> new InvalidUserException(userId));
             var membership = new GroupChannelMembership(member, groupChannel, false);
             memberships.add(membership);
         }
@@ -89,19 +87,19 @@ public class GroupChannelServiceImpl implements GroupChannelService {
 
     @Override
     public Collection<GroupChannelDto> getChannels(String userId, Boolean fetchLatestMessage)
-        throws UserNotFoundException {
+            throws UserNotFoundException {
         var user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         Collection<GroupChannelDto> groupChannelDtos = new LinkedList<>();
 
         var channels = groupChannelMembershipRepository.findByMember(user).stream()
-            .map(GroupChannelMembership::getChannel).toList();
+                .map(GroupChannelMembership::getChannel).toList();
 
         for (var channel : channels) {
             GroupChannelMessage lastMessage = null;
             if (fetchLatestMessage) {
                 lastMessage = groupMessageRepository.findFirstByChannelOrderByCreatedAtDesc(channel)
-                    .orElse(null);
+                        .orElse(null);
             }
             var memberIds = groupChannelMembershipRepository.getMemberIds(channel.getId());
             groupChannelDtos.add(channel.toDto(storageService, lastMessage, memberIds.size()));
@@ -111,10 +109,10 @@ public class GroupChannelServiceImpl implements GroupChannelService {
 
     @Override
     public Collection<MembershipDto> getMembers(Integer channelId)
-        throws ChannelNotFoundException {
+            throws ChannelNotFoundException {
         var memberships = groupChannelMembershipRepository
-            .findByChannel(groupChannelRepository.findById(channelId)
-                .orElseThrow(() -> new ChannelNotFoundException(channelId)));
+                .findByChannel(groupChannelRepository.findById(channelId)
+                        .orElseThrow(() -> new ChannelNotFoundException(channelId)));
         return memberships.stream().map(GroupChannelMembership::toDto).toList();
     }
 

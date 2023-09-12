@@ -1,17 +1,15 @@
 package snack.domain.message;
 
 import snack.domain.channel.UserChannel;
-import snack.domain.storage.Attachment;
 import snack.domain.storage.UserChannelAttachment;
 import snack.domain.user.User;
 import snack.service.StorageService;
-import snack.service.dto.ChannelType;
 import snack.service.dto.MessageDto;
 import jakarta.persistence.*;
 
 @Entity(name = "user_message")
 @Table(name = "user_messages", schema = "app")
-@SequenceGenerator(name = "message_gen", sequenceName = "user_message_seq", allocationSize = 1)
+@SequenceGenerator(name = "message_gen", sequenceName = "user_message_seq", allocationSize = 1, schema = "app")
 public class UserChannelMessage extends Message {
 
     @ManyToOne(optional = false)
@@ -50,12 +48,12 @@ public class UserChannelMessage extends Message {
     public MessageDto toDto(StorageService storageService) {
         var attachment = getAttachment();
         return new MessageDto(
-            getId(),
-            getAuthor().toDto(),
-            getChannel().toInfo(),
-            getContent(),
-            getCreatedAt().toString(),
-            attachment == null ? null : storageService.getDownloadUrl(attachment.getKey()));
+                getId(),
+                getAuthor().toDto(),
+                getChannel().toInfo(),
+                getContent(),
+                getCreatedAt().toString(),
+                attachment == null ? null : getAttachment().toDto(storageService));
     }
 
 }

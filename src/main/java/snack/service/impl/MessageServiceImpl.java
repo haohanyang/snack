@@ -1,6 +1,5 @@
 package snack.service.impl;
 
-import snack.domain.channel.UserChannel;
 import snack.domain.storage.GroupChannelAttachment;
 import snack.domain.storage.UserChannelAttachment;
 import snack.service.StorageService;
@@ -46,12 +45,12 @@ public class MessageServiceImpl implements MessageService {
     private final StorageService storageService;
 
     public MessageServiceImpl(UserRepository userRepository, UserChannelRepository userChannelRepository,
-                              GroupChannelRepository groupChannelRepository, UserMessageRepository userMessageRepository,
-                              GroupMessageRepository groupMessageRepository,
-                              GroupChannelMembershipRepository groupChannelMembershipRepository,
-                              GroupChannelAttachmentRepository groupChannelAttachmentRepository,
-                              UserChannelAttachmentRepository userChannelAttachmentRepository,
-                              SimpMessagingTemplate simpMessagingTemplate, StorageService storageService) {
+            GroupChannelRepository groupChannelRepository, UserMessageRepository userMessageRepository,
+            GroupMessageRepository groupMessageRepository,
+            GroupChannelMembershipRepository groupChannelMembershipRepository,
+            GroupChannelAttachmentRepository groupChannelAttachmentRepository,
+            UserChannelAttachmentRepository userChannelAttachmentRepository,
+            SimpMessagingTemplate simpMessagingTemplate, StorageService storageService) {
         this.userRepository = userRepository;
         this.userChannelRepository = userChannelRepository;
         this.groupChannelRepository = groupChannelRepository;
@@ -69,28 +68,27 @@ public class MessageServiceImpl implements MessageService {
     public MessageDto sendUserChannelMessage(MessageRequest request) throws Exception {
         var authorId = request.authorId();
         var author = userRepository.findById(authorId)
-            .orElseThrow(() -> new InvalidUserException(authorId));
+                .orElseThrow(() -> new InvalidUserException(authorId));
 
         var channelId = request.channel().getId();
         var channel = userChannelRepository.findById(channelId)
-            .orElseThrow(() -> new InvalidChannelIdException(channelId));
+                .orElseThrow(() -> new InvalidChannelIdException(channelId));
         if (!channel.getUser1().equals(author) && !channel.getUser2().equals(author)) {
             throw new IllegalArgumentException(
-                "User " + author.getId() + " is not a member of the channel " + channelId);
+                    "User " + author.getId() + " is not a member of the channel " + channelId);
         }
         var message = new UserChannelMessage(author, request.content(), channel);
 
         if (request.fileUploadResult() != null) {
             var fileInfo = storageService.getFileUploadResult(request.fileUploadResult(), authorId);
             var attachment = userChannelAttachmentRepository.save(new UserChannelAttachment(
-                fileInfo.key(),
-                author,
-                fileInfo.fileName(),
-                fileInfo.size(),
-                fileInfo.bucket(),
-                fileInfo.ContentType(),
-                channel
-            ));
+                    fileInfo.key(),
+                    author,
+                    fileInfo.fileName(),
+                    fileInfo.size(),
+                    fileInfo.bucket(),
+                    fileInfo.ContentType(),
+                    channel));
             message.setAttachment(attachment);
         }
 
@@ -104,21 +102,21 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessageDto sendGroupChannelMessage(MessageRequest request)
-        throws Exception {
+            throws Exception {
 
         var authorId = request.authorId();
         var author = userRepository.findById(authorId)
-            .orElseThrow(() -> new InvalidUserException(authorId));
+                .orElseThrow(() -> new InvalidUserException(authorId));
 
         var channelId = request.channel().getId();
         var channel = groupChannelRepository.findById(channelId)
-            .orElseThrow(() -> new InvalidChannelIdException(channelId));
+                .orElseThrow(() -> new InvalidChannelIdException(channelId));
 
         var memberIds = groupChannelMembershipRepository.getMemberIds(channelId);
         if (!memberIds.contains(authorId)) {
             throw new IllegalArgumentException(
-                "User " + author.getUsername() + " is not a member of the channel "
-                    + channelId);
+                    "User " + author.getUsername() + " is not a member of the channel "
+                            + channelId);
         }
 
         var message = new GroupChannelMessage(author, request.content(), channel);
@@ -126,14 +124,13 @@ public class MessageServiceImpl implements MessageService {
         if (request.fileUploadResult() != null) {
             var fileInfo = storageService.getFileUploadResult(request.fileUploadResult(), authorId);
             var attachment = groupChannelAttachmentRepository.save(new GroupChannelAttachment(
-                fileInfo.key(),
-                author,
-                fileInfo.fileName(),
-                fileInfo.size(),
-                fileInfo.bucket(),
-                fileInfo.ContentType(),
-                channel
-            ));
+                    fileInfo.key(),
+                    author,
+                    fileInfo.fileName(),
+                    fileInfo.size(),
+                    fileInfo.bucket(),
+                    fileInfo.ContentType(),
+                    channel));
             message.setAttachment(attachment);
         }
 
@@ -148,34 +145,38 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public Collection<MessageDto> getUserMessages(Integer channelId, @Nullable String requesterId) throws ChannelNotFoundException {
+    public Collection<MessageDto> getUserMessages(Integer channelId, @Nullable String requesterId)
+            throws ChannelNotFoundException {
         var channel = userChannelRepository.findById(channelId)
-            .orElseThrow(() -> new ChannelNotFoundException(channelId));
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
         // Check if the requester is a member of the channel
         if (requesterId != null) {
             if (!channel.getUser1().getId().equals(requesterId) && !channel.getUser2().getId().equals(requesterId)) {
-                throw new IllegalArgumentException("User " + requesterId + " is not a member of the channel " + channelId);
+                throw new IllegalArgumentException(
+                        "User " + requesterId + " is not a member of the channel " + channelId);
             }
         }
         var messages = userMessageRepository.findByChannel(channel);
         return messages.stream()
-            .map(e -> e.toDto(storageService)).toList();
+                .map(e -> e.toDto(storageService)).toList();
     }
 
     @Override
     @Transactional
-    public Collection<MessageDto> getGroupMessages(Integer channelId, @Nullable String requesterId) throws ChannelNotFoundException {
+    public Collection<MessageDto> getGroupMessages(Integer channelId, @Nullable String requesterId)
+            throws ChannelNotFoundException {
         var channel = groupChannelRepository.findById(channelId)
-            .orElseThrow(() -> new ChannelNotFoundException(channelId));
+                .orElseThrow(() -> new ChannelNotFoundException(channelId));
         // Check if the requester is a member of the channel
         if (requesterId != null) {
             var membership = groupChannelMembershipRepository.findByMemberIdAndChannelId(requesterId, channelId);
             if (membership.isEmpty()) {
-                throw new IllegalArgumentException("User " + requesterId + " is not a member of the channel " + channelId);
+                throw new IllegalArgumentException(
+                        "User " + requesterId + " is not a member of the channel " + channelId);
             }
         }
         var messages = groupMessageRepository.findByChannel(channel);
         return messages.stream()
-            .map(e -> e.toDto(storageService)).toList();
+                .map(e -> e.toDto(storageService)).toList();
     }
 }

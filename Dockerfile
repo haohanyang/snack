@@ -4,11 +4,6 @@ COPY ./ /home/app
 
 WORKDIR /home/app
 
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs
-
-RUN npm install && npm run build
-
 RUN ./mvnw package -Dmaven.test.skip
 
 ARG JAR_FILE=target/*.jar

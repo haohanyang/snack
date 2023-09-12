@@ -4,7 +4,6 @@ import snack.service.StorageService;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
-import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,12 +12,11 @@ import snack.domain.storage.UserChannelAttachment;
 import snack.domain.user.User;
 import snack.service.dto.ChannelInfo;
 import snack.service.dto.ChannelType;
-import snack.service.dto.MessageDto;
 import snack.service.dto.UserChannelDto;
 
 @Entity(name = "user_channel")
 @Table(name = "user_channels", schema = "app")
-@SequenceGenerator(name = "channel_gen", sequenceName = "user_channel_seq", allocationSize = 1)
+@SequenceGenerator(name = "channel_gen", sequenceName = "user_channel_seq", allocationSize = 1, schema = "app")
 public class UserChannel extends Channel {
 
     // user1.id < user2.id
@@ -87,20 +85,20 @@ public class UserChannel extends Channel {
 
     public ChannelInfo toInfo() {
         return new ChannelInfo(
-            getId(),
-            ChannelType.USER);
+                getId(),
+                ChannelType.USER);
     }
 
     public UserChannelDto toDto(StorageService storageService, @Nullable UserChannelMessage lastMessage) {
         var lastUpdated = lastMessage == null ? getCreatedAt() : lastMessage.getCreatedAt();
         var lastMessageDto = lastMessage == null ? null : lastMessage.toDto(storageService);
         return new UserChannelDto(
-            getId().toString(),
-            ChannelType.USER,
-            lastMessageDto,
-            lastUpdated.toString(),
-            getUser1().toDto(),
-            getUser2().toDto(), 0);
+                getId(),
+                ChannelType.USER,
+                lastMessageDto,
+                lastUpdated.toString(),
+                getUser1().toDto(),
+                getUser2().toDto(), 0);
     }
 
     public static UserChannel createTestUserChannel() {

@@ -8,5 +8,5 @@ public record MessageDto(
     ChannelInfo channel,
     String content,
     String createdAt,
-    @Nullable String attachmentUri) {
+    @Nullable AttachmentDto attachment) {
 }

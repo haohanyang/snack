@@ -1,35 +1,27 @@
 package snack.domain.channel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import snack.config.Constants;
 import snack.domain.message.GroupChannelMessage;
-import snack.domain.message.Message;
 import snack.domain.storage.GroupChannelAttachment;
-import snack.domain.storage.UserChannelAttachment;
-import snack.domain.user.User;
 import snack.service.StorageService;
 import snack.service.dto.ChannelInfo;
 import snack.service.dto.ChannelType;
 import snack.service.dto.GroupChannelDto;
-import snack.service.dto.MessageDto;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import org.hibernate.validator.constraints.Length;
 
-import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity(name = "group_channel")
 @Table(name = "group_channels", schema = "app")
-@SequenceGenerator(name = "channel_gen", sequenceName = "group_channel_seq", allocationSize = 1)
+@SequenceGenerator(name = "channel_gen", sequenceName = "group_channel_seq",
+    allocationSize = 1, schema = "app")
 public class GroupChannel extends Channel {
     @Column(name = "description", length = 200)
     private String description;
 
-    @Column(name = "background_image", length = 300)
-    private String backgroundImage;
+    @Column(name = "avatar", length = 300)
+    private String avatar;
 
     @Column(name = "group_name", length = 30, nullable = false)
     private String name;
@@ -48,6 +40,7 @@ public class GroupChannel extends Channel {
         super();
         this.name = name;
         this.description = description;
+        this.avatar = "https://unpkg.com/ionicons@7.1.0/dist/svg/people-circle-outline.svg";
     }
 
     public Set<GroupChannelMembership> getGroupChannelMemberships() {
@@ -58,8 +51,8 @@ public class GroupChannel extends Channel {
         this.groupChannelMemberships = groupChannelMemberships;
     }
 
-    public void setBackgroundImage(String avatarUrl) {
-        this.backgroundImage = avatarUrl;
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public void setName(String name) {
@@ -82,8 +75,8 @@ public class GroupChannel extends Channel {
         return groupChannelAttachments;
     }
 
-    public String getBackgroundImage() {
-        return backgroundImage;
+    public String getAvatar() {
+        return avatar;
     }
 
     public ChannelInfo toInfo() {
@@ -94,12 +87,12 @@ public class GroupChannel extends Channel {
         var lastUpdated = lastMessage == null ? getCreatedAt() : lastMessage.getCreatedAt();
         var lastMessageDto = lastMessage == null ? null : lastMessage.toDto(storageService);
         return new GroupChannelDto(
-            getId().toString(),
+            getId(),
             ChannelType.GROUP,
             lastMessageDto,
             lastUpdated.toString(),
             getName(),
-            getBackgroundImage(),
+            getAvatar(),
             getDescription(),
             getCreatedAt().toString(),
             memberCount, 0);

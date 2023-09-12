@@ -2,9 +2,6 @@ package snack.domain.message;
 
 import java.sql.Timestamp;
 
-import org.hibernate.validator.constraints.Length;
-
-import snack.config.Constants;
 import snack.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;

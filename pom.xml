@@ -10,9 +10,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <artifactId>snack</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
     <name>snack</name>
-    <description>A chat app</description>
+    <description>Snack API and web socket server</description>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -45,16 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.thymeleaf.extras</groupId>
-            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
-            <version>3.1.1.RELEASE</version>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -117,5 +108,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

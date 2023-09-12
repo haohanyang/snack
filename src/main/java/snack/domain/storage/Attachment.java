@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import snack.service.StorageService;
+import snack.service.dto.AttachmentDto;
 
 @MappedSuperclass
 public class Attachment {
@@ -117,5 +119,9 @@ public class Attachment {
 
     public void setUploader(User uploader) {
         this.uploader = uploader;
+    }
+
+    public AttachmentDto toDto(StorageService storageService) {
+        return new AttachmentDto(getId(), storageService.getDownloadUrl(getBucket(), getKey()), getName(), getContentType());
     }
 }

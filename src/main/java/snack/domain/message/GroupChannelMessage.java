@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 
 @Entity(name = "group_message")
 @Table(name = "group_messages", schema = "app")
-@SequenceGenerator(name = "message_gen", sequenceName = "group_message_seq", allocationSize = 1)
+@SequenceGenerator(name = "message_gen", sequenceName = "group_message_seq", allocationSize = 1, schema = "app")
 public class GroupChannelMessage extends Message {
     @ManyToOne(optional = false)
     @JoinColumn(name = "channel_id")
@@ -52,7 +52,7 @@ public class GroupChannelMessage extends Message {
             getChannel().toInfo(),
             getContent(),
             getCreatedAt().toString(),
-            attachment == null ? null : storageService.getDownloadUrl(attachment.getKey()));
+            attachment == null ? null : getAttachment().toDto(storageService));
     }
 
 }

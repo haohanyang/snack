@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import snack.service.MessageService;
@@ -24,19 +24,22 @@ public class MessageController {
     }
 
     @GetMapping("channels/group/{channel_id}/messages")
-    public Collection<MessageDto> getGroupChannelMessages(@PathVariable(name = "channel_id") Integer channelId, @AuthenticationPrincipal OidcUser principal) {
+    public Collection<MessageDto> getGroupChannelMessages(@PathVariable(name = "channel_id") Integer channelId,
+                                                          @AuthenticationPrincipal Jwt principal) {
         return messageService.getGroupMessages(channelId, principal.getSubject());
     }
 
     @GetMapping("channels/user/{channel_id}/messages")
-    public Collection<MessageDto> getUserChannelMessages(@PathVariable(name = "channel_id") Integer channelId, @AuthenticationPrincipal OidcUser principal) {
+    public Collection<MessageDto> getUserChannelMessages(@PathVariable(name = "channel_id") Integer channelId,
+                                                         @AuthenticationPrincipal Jwt principal) {
         return messageService.getUserMessages(channelId, principal.getSubject());
     }
 
     @PostMapping("channels/group/{channel_id}/messages")
     @ResponseStatus(code = HttpStatus.CREATED)
     public MessageDto sendGroupChannelMessage(@PathVariable(name = "channel_id") Integer channelId,
-                                              @RequestBody MessageRequest request, @AuthenticationPrincipal OidcUser principal)
+                                              @RequestBody MessageRequest request,
+                                              @AuthenticationPrincipal Jwt principal)
         throws Exception {
         if (!channelId.equals(request.channel().getId())) {
             throw new IllegalArgumentException("Channel ID in the path didn't match the channel ID in the request");
@@ -54,7 +57,8 @@ public class MessageController {
     @PostMapping("channels/user/{channel_id}/messages")
     @ResponseStatus(code = HttpStatus.CREATED)
     public MessageDto sendUserChannelMessage(@PathVariable(name = "channel_id") Integer channelId,
-                                             @RequestBody MessageRequest request, @AuthenticationPrincipal OidcUser principal)
+                                             @RequestBody MessageRequest request,
+                                             @AuthenticationPrincipal Jwt principal)
         throws Exception {
         if (!channelId.equals(request.channel().getId())) {
             throw new IllegalArgumentException("The channel ID in the path didn't match the channel ID in the request");

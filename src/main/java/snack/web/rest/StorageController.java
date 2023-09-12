@@ -1,10 +1,10 @@
 package snack.web.rest;
 
+import org.springframework.security.oauth2.jwt.Jwt;
 import snack.service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +26,7 @@ public class StorageController {
 
     @PostMapping("files")
     public FileUploadResult uploadChannelAttachment(@RequestParam("file") MultipartFile file,
-                                                    @AuthenticationPrincipal OidcUser principal)
+                                                    @AuthenticationPrincipal Jwt principal)
         throws Exception {
         var userId = principal.getSubject();
         var attachment = storageService.uploadFile(file, userId);

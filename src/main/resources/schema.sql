@@ -3,12 +3,10 @@ CREATE TABLE IF NOT EXISTS app.users
     id               varchar(64) PRIMARY KEY,
     username         varchar(30) NOT NULL,
     email            varchar(50) NOT NULL,
-    first_name       varchar(30),
-    last_name        varchar(30),
+    full_name        varchar(50),
     avatar           varchar(300),
     background_image varchar(300),
-    bio              varchar(200),
-    status           varchar(30)
+    bio              varchar(200)
 );
 
 CREATE TABLE IF NOT EXISTS app.user_channels
@@ -27,11 +25,11 @@ CREATE TABLE IF NOT EXISTS app.user_channels
 
 CREATE TABLE IF NOT EXISTS app.group_channels
 (
-    id               SERIAL PRIMARY KEY,
-    group_name       varchar(30) NOT NULL,
-    background_image varchar(300),
-    description      varchar(200),
-    created_at       timestamp   NOT NULL
+    id          SERIAL PRIMARY KEY,
+    group_name  varchar(30) NOT NULL,
+    avatar      varchar(300),
+    description varchar(200),
+    created_at  timestamp   NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS app.group_channel_memberships

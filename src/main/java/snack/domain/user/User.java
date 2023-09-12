@@ -26,11 +26,8 @@ public class User {
     @Column(name = "username", length = 30, nullable = false)
     private String username;
 
-    @Column(name = "first_name", length = 30)
-    private String firstName;
-
-    @Column(name = "last_name", length = 30)
-    private String lastName;
+    @Column(name = "full_name", length = 50)
+    private String fullName;
 
     @Email
     @Column(name = "email", length = 50, nullable = false)
@@ -44,9 +41,6 @@ public class User {
 
     @Column(name = "bio", length = 200)
     private String bio;
-
-    @Column(name = "status", length = 30)
-    private String status;
 
     @OneToMany(mappedBy = "member")
     private Set<GroupChannelMembership> groupChannelMemberships = new HashSet<>();
@@ -75,8 +69,11 @@ public class User {
     public User() {
     }
 
-    public User(String username, String email, String passwordHash, String firstName, String lastName) {
-
+    public User(String id, String email, String username, String fullName) {
+        this.id = id;
+        this.email = email;
+        this.username = username;
+        this.fullName = fullName;
     }
 
     public String getId() {
@@ -109,14 +106,6 @@ public class User {
 
     public void setBio(String bio) {
         this.bio = bio;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getBackgroundImage() {
@@ -163,20 +152,12 @@ public class User {
         this.userMessages = userMessages;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setFullName(String firstName) {
+        this.fullName = firstName;
     }
 
     public String getEmail() {
@@ -223,8 +204,7 @@ public class User {
         var user = new User();
         user.setId(UUID.randomUUID().toString());
         user.setUsername(UUID.randomUUID().toString().substring(0, 15));
-        user.setFirstName("TestFirstName");
-        user.setLastName("TestLastName");
+        user.setFullName("TestFirstName");
         user.setEmail("test@mail.com");
         return user;
     }
@@ -234,11 +214,9 @@ public class User {
         return new UserDto(
             getId(),
             getUsername(),
-            getFirstName(),
-            getLastName(),
+            getFullName(),
             getAvatar(),
             getBackgroundImage(),
-            getBio(),
-            getStatus());
+            getBio());
     }
 }

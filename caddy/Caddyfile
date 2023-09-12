@@ -1,0 +1,23 @@
+website {
+	handle /api/* {
+    reverse_proxy localhost:8080
+  }
+
+  handle /ws {
+    reverse_proxy localhost:8080
+  }
+
+  handle /ws/* {
+    reverse_proxy localhost:8080
+  }
+
+  handle {
+    root * /var/www/snack-website
+    try_files {path} /index.html
+    file_server
+  }
+}
+
+website:80 {
+  redir https://{host}{uri}
+}

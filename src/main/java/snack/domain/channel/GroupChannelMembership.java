@@ -14,7 +14,8 @@ public class GroupChannelMembership {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_channel_membership_gen")
-    @SequenceGenerator(name = "group_channel_membership_gen", sequenceName = "group_channel_membership_seq", allocationSize = 1)
+    @SequenceGenerator(name = "group_channel_membership_gen", sequenceName = "group_channel_membership_seq",
+        allocationSize = 1, schema = "app")
     private Integer id;
 
     @Column(name = "created_at")

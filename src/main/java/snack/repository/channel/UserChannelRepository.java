@@ -1,6 +1,5 @@
 package snack.repository.channel;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 

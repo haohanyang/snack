@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import snack.service.GroupChannelService;
@@ -37,7 +37,7 @@ public class ChannelController {
      * @return a collection of user channels and group channels
      */
     @GetMapping("users/{user_id}/channels")
-    public Channels getChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal OidcUser principal) {
+    public Channels getChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal Jwt principal) {
         if (!userId.equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the requested user ID");
         }
@@ -58,7 +58,7 @@ public class ChannelController {
      * @return a collection of group channels
      */
     @GetMapping("users/{user_id}/channels/group")
-    public Collection<GroupChannelDto> getGroupChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal OidcUser principal) {
+    public Collection<GroupChannelDto> getGroupChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal Jwt principal) {
         if (!userId.equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the requested user ID");
         }
@@ -75,7 +75,7 @@ public class ChannelController {
     @PostMapping("channels/group")
     @ResponseStatus(code = HttpStatus.CREATED)
     public GroupChannelDto createGroupChannel(
-        @RequestBody GroupChannelRequest request, @AuthenticationPrincipal OidcUser principal) {
+        @RequestBody GroupChannelRequest request, @AuthenticationPrincipal Jwt principal) {
         if (!request.creatorId().equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the creator ID");
         }
@@ -116,7 +116,7 @@ public class ChannelController {
     @PostMapping("channels/user")
     @ResponseStatus(code = HttpStatus.CREATED)
     public UserChannelDto createUserChannel(
-        @RequestBody UserChannelRequest request, @AuthenticationPrincipal OidcUser principal) {
+        @RequestBody UserChannelRequest request, @AuthenticationPrincipal Jwt principal) {
         if (!request.user1Id().equals(principal.getSubject()) && !request.user2Id().equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match any user ID");
         }
