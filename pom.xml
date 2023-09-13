@@ -99,12 +99,22 @@
             <groupId>io.awspring.cloud</groupId>
             <artifactId>spring-cloud-aws-starter-s3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>3.0.5</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+             <plugin>
+                <groupId>com.github.ulisesbocchio</groupId>
+                <artifactId>jasypt-maven-plugin</artifactId>
+                <version>3.0.5</version>
             </plugin>
         </plugins>
     </build>

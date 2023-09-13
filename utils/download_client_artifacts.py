@@ -1,4 +1,4 @@
-# Download the latest build artifact of GitHub Actions
+# Download the latest client build artifact of GitHub Actions
 # and unzip the file to /var/www/snack-client
 
 import requests
@@ -6,8 +6,8 @@ import logging
 import os
 from pathlib import Path
 
-REPO = os.environ["REPO"]
-GH_TOKEN = os.environ["GH_TOKEN"]
+REPO = os.environ["CLIENT_REPO"]
+GH_TOKEN = os.environ["CLIENT_GH_TOKEN"]
 DOWNLOAD_DIR = "/var/www"
 
 if __name__ == "__main__":

@@ -24,9 +24,13 @@ data fetching and caching.
 ## Deployment
 Build the docker image 
 ```
-docker build -t snack-app:v1 .
+docker build -t snack-server:v1 .
 ```
-In runtime, the app requires a property file `application-deploy.properties` with secrets to be mounted to the container.
-```
-docker run -it -d --name snack-app-container --mount type=bind,source=/path/to/application-deploy.properties,target=/app/application-deploy.properties -p 8080:8080 snakc-app:v1
+Before running the container, encrypt the secrets in the properties file using Jasypt
+```bash
+# Encrypt the properties file
+./mvnw jasypt:encrypt -Djasypt.plugin.path="file:/path/to/properties" -Djasypt.encryptor.password="password"
+
+# Run the container
+docker run -it --name snack-server-container --mount type=bind,source=/path/to/properties,target=/config/application.properties -p 8080:8080 -e spring_profiles_active=prod snack-server:v1 --spring.config.location=/config/application.properties --jasypt.encryptor.password="password"
 ```
