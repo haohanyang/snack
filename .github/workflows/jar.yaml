@@ -15,8 +15,6 @@ jobs:
         cache: maven
     - name: Build JAR file with Maven
       run: ./mvnw package -DskipTests
-    - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@v3
     - name: Upload JAR files 
       uses: actions/upload-artifact@v3
       with:
