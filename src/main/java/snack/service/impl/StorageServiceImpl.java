@@ -1,8 +1,16 @@
 package snack.service.impl;
 
+import java.net.URL;
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.UUID;
 
 import snack.service.dto.*;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.CreateMultipartUploadPresignRequest;
+
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +21,7 @@ import io.awspring.cloud.s3.S3Template;
 
 @Service
 public class StorageServiceImpl implements StorageService {
+
     private final S3Template s3Template;
 
     @Value("${aws-s3-bucket}")
@@ -22,7 +31,7 @@ public class StorageServiceImpl implements StorageService {
     private String cloudFrontDomain;
 
     public StorageServiceImpl(
-        S3Template s3Template) {
+            S3Template s3Template) {
         this.s3Template = s3Template;
     }
 
@@ -35,17 +44,17 @@ public class StorageServiceImpl implements StorageService {
         var inputStream = file.getInputStream();
         var key = UUID.randomUUID().toString();
         var resource = s3Template.upload(bucket, key, inputStream,
-            ObjectMetadata.builder()
-                .contentType(file.getContentType())
-                .metadata("uploader", userId)
-                .build());
+                ObjectMetadata.builder()
+                        .contentType(file.getContentType())
+                        .metadata("uploader", userId)
+                        .build());
         return new FileUploadResult(
-            getDownloadUrl(bucket, key),
-            bucket,
-            key,
-            file.getOriginalFilename(),
-            file.getSize(),
-            file.getContentType());
+                getDownloadUrl(bucket, key),
+                bucket,
+                key,
+                file.getOriginalFilename(),
+                file.getSize(),
+                file.getContentType());
     }
 
     @Override
@@ -58,17 +67,33 @@ public class StorageServiceImpl implements StorageService {
             throw new IllegalArgumentException("User doesn't match");
         }
         return new FileUploadResult(
-            getDownloadUrl(result.bucket(), result.key()),
-            result.bucket(),
-            result.key(),
-            result.fileName(),
-            resource.contentLength(),
-            resource.contentType()
-        );
+                getDownloadUrl(result.bucket(), result.key()),
+                result.bucket(),
+                result.key(),
+                result.fileName(),
+                resource.contentLength(),
+                resource.contentType());
     }
 
     @Override
     public String getDownloadUrl(String bucket, String key) {
         return "https://" + cloudFrontDomain + "/" + key;
+    }
+
+    @Override
+    public Triple<String, String, String> getUploadUrl(String userId, String contentType) {
+
+        var key = UUID.randomUUID().toString();
+        var metadata = ObjectMetadata.builder()
+                .contentType(contentType)
+                .metadata("uploader", userId)
+                .build();
+        var url = s3Template.createSignedPutURL(
+                bucket,
+                key,
+                Duration.ofSeconds(30),
+                metadata,
+                contentType);
+        return Triple.of(bucket, key, url.toString());
     }
 }
