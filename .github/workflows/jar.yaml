@@ -1,8 +1,6 @@
 name: Build JAR file with Maven
 
-on:
-  push:
-    branches: [ "*" ]
+on: [push]
 
 jobs:
   build:

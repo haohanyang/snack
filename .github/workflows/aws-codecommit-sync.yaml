@@ -1,11 +1,6 @@
 name: Synchronize to AWS CodeCommit
 
-on:
-  push:
-    tags-ignore:
-      - '*'
-    branches:
-      - '*'
+on: [push]
 
 permissions:
       id-token: write
