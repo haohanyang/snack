@@ -10,7 +10,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <artifactId>snack</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0</version>
     <name>snack</name>
     <description>Snack API and web socket server</description>
     <properties>
