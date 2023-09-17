@@ -10,11 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.web.cors.CorsConfiguration;
-import snack.security.JwtFilter;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +57,7 @@ public class WebSecurityConfig {
         http.oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-        http.addFilterAfter(new JwtFilter(), BearerTokenAuthenticationFilter.class);
+        // http.addFilterAfter(new JwtFilter(), BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 

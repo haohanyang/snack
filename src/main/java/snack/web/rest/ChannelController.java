@@ -1,15 +1,15 @@
 package snack.web.rest;
 
 import java.util.Collection;
+import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.extern.slf4j.Slf4j;
 import snack.service.GroupChannelService;
 import snack.service.UserChannelService;
 import snack.service.dto.*;
@@ -18,14 +18,14 @@ import snack.web.requests.UserChannelRequest;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ChannelController {
-    private final Logger logger = LoggerFactory.getLogger(ChannelController.class);
     private final GroupChannelService groupChannelService;
     private final UserChannelService userChannelService;
 
     public ChannelController(
-        GroupChannelService groupChannelService,
-        UserChannelService userChannelService) {
+            GroupChannelService groupChannelService,
+            UserChannelService userChannelService) {
         this.groupChannelService = groupChannelService;
         this.userChannelService = userChannelService;
     }
@@ -38,15 +38,20 @@ public class ChannelController {
      */
     @GetMapping("users/{user_id}/channels")
     public Channels getChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal Jwt principal) {
-        if (!userId.equals(principal.getSubject())) {
+        if (Objects.equals(userId, "@me")) {
+            userId = principal.getSubject();
+        }
+
+        if (!Objects.equals(userId, principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the requested user ID");
         }
+
         var userChannels = userChannelService.getChannels(userId);
         var groupChannels = groupChannelService.getChannels(userId, true);
 
         return new Channels(
-            userChannels,
-            groupChannels);
+                userChannels,
+                groupChannels);
     }
 
     /* Group Channels */
@@ -58,8 +63,13 @@ public class ChannelController {
      * @return a collection of group channels
      */
     @GetMapping("users/{user_id}/channels/group")
-    public Collection<GroupChannelDto> getGroupChannels(@PathVariable(name = "user_id") String userId, @AuthenticationPrincipal Jwt principal) {
-        if (!userId.equals(principal.getSubject())) {
+    public Collection<GroupChannelDto> getGroupChannels(@PathVariable(name = "user_id") String userId,
+            @AuthenticationPrincipal Jwt principal) {
+        if (Objects.equals(userId, "@me")) {
+            userId = principal.getSubject();
+        }
+
+        if (!Objects.equals(userId, principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the requested user ID");
         }
         var groupChannels = groupChannelService.getChannels(userId, false);
@@ -75,12 +85,12 @@ public class ChannelController {
     @PostMapping("channels/group")
     @ResponseStatus(code = HttpStatus.CREATED)
     public GroupChannelDto createGroupChannel(
-        @RequestBody GroupChannelRequest request, @AuthenticationPrincipal Jwt principal) {
+            @RequestBody GroupChannelRequest request, @AuthenticationPrincipal Jwt principal) {
         if (!request.creatorId().equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match the creator ID");
         }
         var channel = groupChannelService.createChannel(request);
-        logger.info("User {} created a group channel {}, name {}", request.creatorId(), channel.id(), channel.name());
+        log.info("User {} created a group channel {}, name {}", request.creatorId(), channel.id(), channel.name());
         return channel;
     }
 
@@ -116,13 +126,13 @@ public class ChannelController {
     @PostMapping("channels/user")
     @ResponseStatus(code = HttpStatus.CREATED)
     public UserChannelDto createUserChannel(
-        @RequestBody UserChannelRequest request, @AuthenticationPrincipal Jwt principal) {
+            @RequestBody UserChannelRequest request, @AuthenticationPrincipal Jwt principal) {
         if (!request.user1Id().equals(principal.getSubject()) && !request.user2Id().equals(principal.getSubject())) {
             throw new IllegalArgumentException("Principal ID didn't match any user ID");
         }
         var channel = userChannelService.createChannel(request);
-        logger.info("User channel of user {} and user {} was created, channel id {}", channel.user1().id(),
-            channel.user2().id(), channel.id());
+        log.info("User channel of user {} and user {} was created, channel id {}", channel.user1().getId(),
+                channel.user2().getId(), channel.id());
         return channel;
     }
 

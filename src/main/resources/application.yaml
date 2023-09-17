@@ -1,7 +1,0 @@
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://cognito-idp.eu-north-1.amazonaws.com/${AWS_COGNITO_USERPOOL_ID}
-          audiences: ${AWS_COGNITO_CLIENT_ID}
