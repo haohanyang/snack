@@ -13,8 +13,6 @@ def lambda_handler(event, context):
     https://github.com/jkehler/awslambda-psycopg2
     """
     logger = logging.getLogger(context.function_name)
-    logger.info(event)
-    logger.info(context)
 
     user_id: str = event["userName"]
     email: str = event["request"]["userAttributes"]["email"].strip()
@@ -32,8 +30,8 @@ def lambda_handler(event, context):
         "https://unpkg.com/ionicons@7.1.0/dist/svg/person-circle-outline.svg"
     )
 
-    schema_name = "app2"
-    table_name = "users"
+    schema_name = os.environ["DB_SCHEMA"]
+    table_name = os.environ["DB_USER_TABLE"]
     # Add the user to the database
     with conn.cursor() as cur:
         cur.execute(

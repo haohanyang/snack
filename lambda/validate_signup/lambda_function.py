@@ -10,8 +10,7 @@ def lambda_handler(event, context):
     https://github.com/jkehler/awslambda-psycopg2
     """
     logger = logging.getLogger(context.function_name)
-    logger.info(event)
-    logger.info(context)
+
     user_id: str = event["userName"]
     email: str = event["request"]["userAttributes"]["email"].strip()
     full_name: str = event["request"]["userAttributes"]["name"].strip()
