@@ -6,8 +6,8 @@ import logging
 import os
 from pathlib import Path
 
-REPO = os.environ["CLIENT_REPO"]
-GH_TOKEN = os.environ["CLIENT_GH_TOKEN"]
+REPO = "haohanyang/snack-client"
+GH_TOKEN = os.getenv("GH_TOKEN")
 DOWNLOAD_DIR = "/var/www"
 
 if __name__ == "__main__":
@@ -31,9 +31,9 @@ if __name__ == "__main__":
         logger.error(artifacts_info["message"])
         exit(1)
 
-    # Make sure the directory exists
-    if not (Path(DOWNLOAD_DIR).exists() and Path(DOWNLOAD_DIR).is_dir()):
-        logger.error(f"Download directory {DOWNLOAD_DIR} does not exist")
+    # Make sure the destination directory exists
+    if not Path(DOWNLOAD_DIR).exists() and Path(DOWNLOAD_DIR).is_dir():
+        logger.error(f"Directory {DOWNLOAD_DIR} does not exist")
         exit(1)
 
     total_count = artifacts_info["total_count"]
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     if len(artifacts) == 0:
         logger.info("No artifacts found")
-        exit(0)
+        exit(1)
 
     latest_artifact = artifacts[0]
 
@@ -53,9 +53,9 @@ if __name__ == "__main__":
 
     if latest_artifact["expired"]:
         logger.error(f"Artifact {artifact_id} is expired")
-        exit(0)
+        exit(1)
 
-        # Download the latest artifact
+    # Download the latest artifact
     archive_download_url = latest_artifact["archive_download_url"]
     logger.info(f"Downloading artifact {artifact_id} from {archive_download_url}")
 
@@ -68,10 +68,10 @@ if __name__ == "__main__":
         },
     )
 
-    with open(f"{DOWNLOAD_DIR}/{artifact_name}.zip", "wb") as f:
+    with open(f"{artifact_name}.zip", "wb") as f:
         f.write(response.content)
 
-    logger.info("Download complete")
+    logger.info("Download completed")
 
     # Unzip the artifact
     logger.info(f"Unzipping artifact {artifact_name}.zip")
@@ -85,8 +85,9 @@ if __name__ == "__main__":
     else:
         # Remove the directory if exists
         os.system(f"rm -rf {DOWNLOAD_DIR}/snack-website")
-    os.system(
-        f"unzip {DOWNLOAD_DIR}/{artifact_name}.zip -d {DOWNLOAD_DIR}/snack-website"
-    )
+    os.system(f"unzip {artifact_name}.zip -d {DOWNLOAD_DIR}/snack-website")
 
-    logger.info("Unzip complete")
+    # Delete the zip file
+    os.system(f"rm {artifact_name}.zip")
+
+    logger.info("Unzip completed")

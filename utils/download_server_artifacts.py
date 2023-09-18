@@ -5,10 +5,8 @@ import requests
 import logging
 import os
 
-
-REPO = os.environ["SERVER_REPO"]
-GH_TOKEN = os.environ["SERVER_GH_TOKEN"]
-
+REPO = "haohanyang/snack"
+GH_TOKEN = os.getenv("GH_TOKEN")
 
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
@@ -22,7 +20,7 @@ if __name__ == "__main__":
             "Authorization": f"Bearer {GH_TOKEN}",
         },
     ).json()
- 
+
     # Check if the request was successful
     if "total_count" not in artifacts_info:
         logger.error(f"Failed to list artifacts for {REPO}")
@@ -69,13 +67,9 @@ if __name__ == "__main__":
     # Unzip the artifact
     logger.info(f"Unzipping artifact {artifact_name}.zip")
 
-    os.system(
-        f"unzip {artifact_name}.zip"
-    )
+    os.system(f"unzip {artifact_name}.zip")
 
     # Delete the zip file
-    os.system(
-        f"rm {artifact_name}.zip"
-    )
+    os.system(f"rm {artifact_name}.zip")
 
     logger.info("Unzip complete")
