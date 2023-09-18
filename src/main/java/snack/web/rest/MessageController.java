@@ -55,9 +55,12 @@ public class MessageController {
         var result = messageService.storeGroupChannelMessage(request);
         var message = result.getFirst();
         var receivers = result.getSecond();
+
+        // Send messages via websocket
         messageService.sendMessage(
                 receivers.stream().map(user -> "/gateway/" + user.getId()).toList(), message);
-        notificationService.sendMessageNotification(receivers, message);
+        // Send notification to receivers other than the first user
+        notificationService.sendMessageNotification(receivers.subList(1, receivers.size()), message);
         return message;
     }
 
@@ -78,9 +81,11 @@ public class MessageController {
         var result = messageService.storeUserChannelMessage(request);
         var message = result.getFirst();
         var receivers = result.getSecond();
+        // Send messages via websocket
         messageService.sendMessage(
                 receivers.stream().map(user -> "/gateway/" + user.getId()).toList(), message);
-        notificationService.sendMessageNotification(receivers, message);
+        // Send notification to receivers other than the first user
+        notificationService.sendMessageNotification(receivers.subList(1, receivers.size()), message);
         return message;
     }
 

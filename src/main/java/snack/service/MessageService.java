@@ -1,6 +1,7 @@
 package snack.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.util.Pair;
 
@@ -16,17 +17,17 @@ public interface MessageService {
          * Store a user channel message in the database
          *
          * @param request the request to send a message
-         * @return The message stored and the receivers of the message
+         * @return The message stored and the receivers of the message. The first user in the collection is the sender
          */
-        Pair<MessageDto, Collection<User>> storeUserChannelMessage(MessageRequest request) throws Exception;
+        Pair<MessageDto, List<User>> storeUserChannelMessage(MessageRequest request) throws Exception;
 
         /**
          * Store a group channel message in the database
          *
          * @param request the request to send a message
-         * @return The message stored and the receivers of the message
+         * @return The message stored and the receivers of the message. The first user in the collection is the sender
          */
-        Pair<MessageDto, Collection<User>> storeGroupChannelMessage(MessageRequest request) throws Exception;
+        Pair<MessageDto, List<User>> storeGroupChannelMessage(MessageRequest request) throws Exception;
 
         /**
          * Get all messages in a user channel. Also check if the requester is in the

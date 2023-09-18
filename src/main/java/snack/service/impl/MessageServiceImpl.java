@@ -31,7 +31,7 @@ import snack.service.exception.InvalidUserException;
 import snack.web.requests.MessageRequest;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -74,7 +74,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	@Transactional
-	public Pair<MessageDto, Collection<User>> storeUserChannelMessage(MessageRequest request) throws Exception {
+	public Pair<MessageDto, List<User>> storeUserChannelMessage(MessageRequest request) throws Exception {
 		var authorId = request.authorId();
 		var author = userRepository.findById(authorId)
 				.orElseThrow(() -> new InvalidUserException(authorId));
@@ -108,12 +108,16 @@ public class MessageServiceImpl implements MessageService {
 		log.info("Saved user {}'s message {} to user channel {}", message.getAuthor().getId(), message.getId(),
 				channelId);
 		var messageDto = message.toDto(storageService);
-		return Pair.of(messageDto, Set.of(channel.getUser1(), channel.getUser2()));
+
+		if (channel.getUser1().getId().equals(request.authorId())) {
+			return Pair.of(messageDto, List.of(channel.getUser1(), channel.getUser2()));
+		}
+		return Pair.of(messageDto, List.of(channel.getUser2(), channel.getUser1()));
 	}
 
 	@Override
 	@Transactional
-	public Pair<MessageDto, Collection<User>> storeGroupChannelMessage(MessageRequest request)
+	public Pair<MessageDto, List<User>> storeGroupChannelMessage(MessageRequest request)
 			throws Exception {
 
 		var authorId = request.authorId();
@@ -124,7 +128,14 @@ public class MessageServiceImpl implements MessageService {
 		var channel = groupChannelRepository.findById(channelId)
 				.orElseThrow(() -> new InvalidChannelIdException(channelId));
 
-		var memberIds = groupChannelMembershipRepository.getMemberIds(channelId);
+		var memberStream = groupChannelMembershipRepository.findByChannel(channel)
+				.stream()
+				.map(e -> e.getMember());
+
+		var memberIds = memberStream
+				.map(e -> e.getId())
+				.toList();
+
 		if (!memberIds.contains(authorId)) {
 			throw new IllegalArgumentException(
 					"User " + author.getId() + " is not a member of the channel "
@@ -152,17 +163,21 @@ public class MessageServiceImpl implements MessageService {
 		groupMessageRepository.save(message);
 		var messageDto = message.toDto(storageService);
 
-		var members = groupChannelMembershipRepository.findByChannel(channel)
-				.stream()
-				.map(e -> e.getMember())
+		var otherMembers = memberStream
+				.filter(e -> !e.getId().equals(authorId))
 				.toList();
+
+		// Ensure that the author is the first member in the list
+		var members = List.of(author);
+		members.addAll(otherMembers);
+
 		log.info("Saved user {}'s message {} to group channel {}", message.getAuthor().getId(), message.getId());
 		return Pair.of(messageDto, members);
 	}
 
 	@Override
 	@Transactional
-	public Collection<MessageDto> getUserMessages(Integer channelId, @Nullable String requesterId)
+	public List<MessageDto> getUserMessages(Integer channelId, @Nullable String requesterId)
 			throws ChannelNotFoundException {
 		var channel = userChannelRepository.findById(channelId)
 				.orElseThrow(() -> new ChannelNotFoundException(channelId));
@@ -181,7 +196,7 @@ public class MessageServiceImpl implements MessageService {
 
 	@Override
 	@Transactional
-	public Collection<MessageDto> getGroupMessages(Integer channelId, @Nullable String requesterId)
+	public List<MessageDto> getGroupMessages(Integer channelId, @Nullable String requesterId)
 			throws ChannelNotFoundException {
 		var channel = groupChannelRepository.findById(channelId)
 				.orElseThrow(() -> new ChannelNotFoundException(channelId));

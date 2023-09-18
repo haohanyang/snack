@@ -112,7 +112,6 @@ public class NotificationServiceImpl implements NotificationService {
             snsClient.publish(builder -> builder
                     .message(json)
                     .messageStructure("json")
-                    // TODO: duplicate notifications if json
                     .targetArn(token.getSnsEndpointArn()));
             log.info("Publish notification: user {}, device {}, endpoint {}", token.getUser().getId(),
                     token.getToken(), token.getSnsEndpointArn());
