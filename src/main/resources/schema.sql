@@ -1,14 +1,11 @@
 CREATE TABLE IF NOT EXISTS app.users
 (
     id               varchar(64) PRIMARY KEY,
-    username         varchar(30) NOT NULL,
-    email            varchar(50) NOT NULL,
-    first_name       varchar(30),
-    last_name        varchar(30),
+    email            varchar(50) UNIQUE NOT NULL,
+    full_name        varchar(50),
     avatar           varchar(300),
     background_image varchar(300),
-    bio              varchar(200),
-    status           varchar(30)
+    bio              varchar(200)
 );
 
 CREATE TABLE IF NOT EXISTS app.user_channels
@@ -27,11 +24,11 @@ CREATE TABLE IF NOT EXISTS app.user_channels
 
 CREATE TABLE IF NOT EXISTS app.group_channels
 (
-    id               SERIAL PRIMARY KEY,
-    group_name       varchar(30) NOT NULL,
-    background_image varchar(300),
-    description      varchar(200),
-    created_at       timestamp   NOT NULL
+    id          SERIAL PRIMARY KEY,
+    group_name  varchar(30) NOT NULL,
+    avatar      varchar(300),
+    description varchar(200),
+    created_at  timestamp   NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS app.group_channel_memberships
@@ -52,9 +49,9 @@ CREATE TABLE IF NOT EXISTS app.group_channel_memberships
 CREATE TABLE IF NOT EXISTS app.user_assets
 (
     id           SERIAL PRIMARY KEY,
-    object_key   varchar(36) UNIQUE NOT NULL,
+    object_key   varchar(50) UNIQUE NOT NULL,
     uploader_id  varchar(64)        NOT NULL,
-    file_name    varchar(80)        NOT NULL,
+    file_name    varchar(100)        NOT NULL,
     size         bigint             NOT NULL,
     bucket       varchar(30)        NOT NULL,
     content_type varchar(30)        NOT NULL,
@@ -67,9 +64,9 @@ CREATE TABLE IF NOT EXISTS app.user_assets
 CREATE TABLE IF NOT EXISTS app.group_channel_attachments
 (
     id           SERIAL PRIMARY KEY,
-    object_key   varchar(36) UNIQUE NOT NULL,
+    object_key   varchar(50) UNIQUE NOT NULL,
     uploader_id  varchar(64)        NOT NULL,
-    file_name    varchar(80)        NOT NULL,
+    file_name    varchar(100)        NOT NULL,
     size         bigint             NOT NULL,
     bucket       varchar(30)        NOT NULL,
     content_type varchar(30)        NOT NULL,
@@ -86,9 +83,9 @@ CREATE TABLE IF NOT EXISTS app.group_channel_attachments
 CREATE TABLE IF NOT EXISTS app.user_channel_attachments
 (
     id           SERIAL PRIMARY KEY,
-    object_key   varchar(36) UNIQUE NOT NULL,
+    object_key   varchar(50) UNIQUE NOT NULL,
     uploader_id  varchar(64)        NOT NULL,
-    file_name    varchar(80)        NOT NULL,
+    file_name    varchar(100)        NOT NULL,
     size         bigint             NOT NULL,
     bucket       varchar(30)        NOT NULL,
     content_type varchar(30)        NOT NULL,
@@ -102,7 +99,7 @@ CREATE TABLE IF NOT EXISTS app.user_channel_attachments
         ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS app.group_messages
+CREATE TABLE IF NOT EXISTS app.group_channel_messages
 (
     id            SERIAL PRIMARY KEY,
     author_id     varchar(64) NOT NULL,
@@ -122,7 +119,7 @@ CREATE TABLE IF NOT EXISTS app.group_messages
 );
 
 
-CREATE TABLE IF NOT EXISTS app.user_messages
+CREATE TABLE IF NOT EXISTS app.user_channel_messages
 (
     id            SERIAL PRIMARY KEY,
     author_id     varchar(64) NOT NULL,
@@ -141,12 +138,25 @@ CREATE TABLE IF NOT EXISTS app.user_messages
         ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS app.fcm_registration_tokens
+(
+    id            SERIAL PRIMARY KEY,
+    token         varchar(300) UNIQUE NOT NULL,
+    user_id       varchar(64) NOT NULL,
+    created_at    timestamp NOT NULL,
+    sns_endpoint_arn varchar(200) NOT NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES app.users (id)
+        ON DELETE NO ACTION ON UPDATE CASCADE
+);
+
+
 CREATE SEQUENCE IF NOT EXISTS app.group_channel_seq;
 CREATE SEQUENCE IF NOT EXISTS app.group_channel_membership_seq;
 CREATE SEQUENCE IF NOT EXISTS app.user_channel_seq;
 CREATE SEQUENCE IF NOT EXISTS app.group_message_seq;
 CREATE SEQUENCE IF NOT EXISTS app.user_message_seq;
-
 CREATE SEQUENCE IF NOT EXISTS app.group_channel_attachment_seq;
 CREATE SEQUENCE IF NOT EXISTS app.user_asset_seq;
 CREATE SEQUENCE IF NOT EXISTS app.user_channel_attachment_seq;
+CREATE SEQUENCE IF NOT EXISTS app.fcm_registration_token_seq;

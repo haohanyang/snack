@@ -3,6 +3,8 @@ package snack.domain.storage;
 import java.sql.Timestamp;
 
 import snack.domain.user.User;
+import snack.service.StorageService;
+import snack.service.dto.AttachmentDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,9 +12,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
 
 @MappedSuperclass
+@Getter
 public class Attachment {
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attachment_gen")
@@ -22,10 +27,10 @@ public class Attachment {
     @JoinColumn(name = "uploader_id")
     private User uploader;
 
-    @Column(name = "object_key", length = 36, unique = true, nullable = false)
+    @Column(name = "object_key", length = 50, unique = true, nullable = false)
     private String key;
 
-    @Column(name = "file_name", length = 80, nullable = false)
+    @Column(name = "file_name", length = 100, nullable = false)
     private String name;
 
     @Column(name = "size", nullable = false)
@@ -38,84 +43,11 @@ public class Attachment {
     private String contentType;
 
     @Column(name = "created_at", nullable = false)
-    private Timestamp createdAt;
+    private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
-    public Attachment() {
-
-    }
-
-    public Attachment(String uuid, User uploader, String name, Long size, String bucket, String contentType) {
-        this.key = uuid;
-        this.uploader = uploader;
-        this.name = name;
-        this.size = size;
-        this.bucket = bucket;
-        this.contentType = contentType;
-        this.createdAt = new Timestamp(System.currentTimeMillis());
-
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getSize() {
-        return size;
-    }
-
-    public String getBucket() {
-        return bucket;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setKey(String uuid) {
-        this.key = uuid;
-    }
-
-    public void setSize(Long size) {
-        this.size = size;
-    }
-
-    public void setBucket(String bucket) {
-        this.bucket = bucket;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public User getUploader() {
-        return uploader;
-    }
-
-    public void setUploader(User uploader) {
-        this.uploader = uploader;
+    public AttachmentDto toDto(StorageService storageService) {
+        return new AttachmentDto(getId(), storageService.getDownloadUrl(
+                getKey()), getName(),
+                getContentType());
     }
 }

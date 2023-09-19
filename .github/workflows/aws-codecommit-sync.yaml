@@ -1,11 +1,6 @@
 name: Synchronize to AWS CodeCommit
 
-on:
-  push:
-    tags-ignore:
-      - '*'
-    branches:
-      - '*'
+on: [push]
 
 permissions:
       id-token: write
@@ -16,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

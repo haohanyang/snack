@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 
@@ -24,11 +23,12 @@ public class ConnectionListener implements ApplicationListener<SessionConnectEve
         var accessor = StompHeaderAccessor.wrap(event.getMessage());
         var connectionId = accessor.getSessionId();
         var user = accessor.getUser();
-        if (user instanceof OAuth2AuthenticationToken token) {
-            var userId = token.getPrincipal().getName();
+
+        if (user != null) {
+            var userId = user.getName();
             var currentConnectionsCount = connectionService.addConnection(userId, connectionId);
-            logger.info("User {} connected, connection id {}, total connections {}", token.getPrincipal().getName(),
-                connectionId, currentConnectionsCount);
+            logger.info("User {} connected, connection id {}, total connections {}", userId,
+                    connectionId, currentConnectionsCount);
         }
     }
 

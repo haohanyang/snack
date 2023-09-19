@@ -1,45 +1,63 @@
 package snack.config;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.messaging.Message;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.messaging.access.intercept.MessageMatcherDelegatingAuthorizationManager;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.SecurityFilterChain;
 
-import snack.service.UserService;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
+import java.util.Objects;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    private final UserService userService;
+    private final Environment env;
 
-    public WebSecurityConfig(UserService userService) {
-        this.userService = userService;
+    public WebSecurityConfig(Environment env) {
+        this.env = env;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable();
+
+        http.csrf(
+                csrf -> csrf.disable());
+
+        var activeProfile = env.getProperty("spring.profiles.active");
+
+        if (Objects.equals(activeProfile, "dev")) {
+            // Allow cors only in dev mode
+            http.cors(
+                    cors -> cors.configurationSource(
+                            request -> {
+                                var corsConfiguration = new CorsConfiguration();
+                                corsConfiguration.setAllowedOrigins(List.of("*"));
+                                corsConfiguration.setAllowedMethods(List.of("*"));
+                                corsConfiguration.setAllowedHeaders(List.of("*"));
+                                return corsConfiguration;
+                            }));
+        }
+
+        http.sessionManagement(
+                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         http.authorizeHttpRequests(
-            request -> request.requestMatchers("/chat/**", "/api/v1/**").authenticated()
-                .anyRequest().permitAll());
-        http.oauth2Login(
-            oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo.oidcUserService(this.oidcUserService())));
-        http.logout(logout -> logout.logoutSuccessUrl("/"));
+                request -> request.requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll());
+        http.oauth2ResourceServer(
+                oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        // http.addFilterAfter(new JwtFilter(), BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 
@@ -50,19 +68,8 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthorizationManager<Message<?>> messageAuthorizationManager(
-        MessageMatcherDelegatingAuthorizationManager.Builder messages) {
+            MessageMatcherDelegatingAuthorizationManager.Builder messages) {
         messages.anyMessage().authenticated();
         return messages.build();
     }
-
-    private OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
-        final OidcUserService delegate = new OidcUserService();
-        return (userRequest) -> {
-            var oidcUser = delegate.loadUser(userRequest);
-            var info = userService.mapUserInfo(oidcUser.getUserInfo());
-            Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-            return new DefaultOidcUser(authorities, oidcUser.getIdToken(), info);
-        };
-    }
-
 }

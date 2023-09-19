@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import snack.domain.channel.UserChannel;
 import snack.repository.channel.UserChannelRepository;
-import snack.repository.message.UserMessageRepository;
+import snack.repository.message.UserChannelMessageRepository;
 import snack.repository.user.UserRepository;
 import snack.service.UserChannelService;
 import snack.service.dto.UserChannelDto;
@@ -24,11 +24,11 @@ public class UserChannelServiceImpl implements UserChannelService {
 
     private final UserRepository userRepository;
     private final UserChannelRepository userChannelRepository;
-    private final UserMessageRepository userMessageRepository;
+    private final UserChannelMessageRepository userMessageRepository;
     private final StorageService storageService;
 
     public UserChannelServiceImpl(UserRepository userRepository, UserChannelRepository userChannelRepository,
-                                  UserMessageRepository userMessageRepository, StorageService storageService) {
+            UserChannelMessageRepository userMessageRepository, StorageService storageService) {
         this.userRepository = userRepository;
         this.userChannelRepository = userChannelRepository;
         this.userMessageRepository = userMessageRepository;
@@ -38,16 +38,16 @@ public class UserChannelServiceImpl implements UserChannelService {
     @Override
     @Transactional
     public UserChannelDto createChannel(UserChannelRequest request)
-        throws InvalidUserException {
+            throws InvalidUserException {
 
         if (request.user1Id().equals(request.user2Id())) {
             throw new InvalidUserException("User ids are equal");
         }
 
         var user1 = userRepository.findById(request.user1Id())
-            .orElseThrow(() -> new InvalidUserException(request.user1Id()));
+                .orElseThrow(() -> new InvalidUserException(request.user1Id()));
         var user2 = userRepository.findById(request.user2Id())
-            .orElseThrow(() -> new InvalidUserException(request.user2Id()));
+                .orElseThrow(() -> new InvalidUserException(request.user2Id()));
 
         Optional<UserChannel> channel;
 
@@ -59,7 +59,7 @@ public class UserChannelServiceImpl implements UserChannelService {
 
         if (channel.isPresent()) {
             var lastMessage = userMessageRepository.findFirstByChannelOrderByCreatedAtDesc(channel.get())
-                .orElse(null);
+                    .orElse(null);
             return channel.get().toDto(storageService, lastMessage);
         }
 
@@ -72,9 +72,9 @@ public class UserChannelServiceImpl implements UserChannelService {
     @Transactional(readOnly = true)
     public UserChannelDto getChannel(Integer id) throws ChannelNotFoundException {
         var userChannel = userChannelRepository.findById(id)
-            .orElseThrow(() -> new ChannelNotFoundException(id));
+                .orElseThrow(() -> new ChannelNotFoundException(id));
         var lastMessage = userMessageRepository.findFirstByChannelOrderByCreatedAtDesc(userChannel)
-            .orElse(null);
+                .orElse(null);
         return userChannel.toDto(storageService, lastMessage);
     }
 
@@ -89,14 +89,14 @@ public class UserChannelServiceImpl implements UserChannelService {
     @Transactional(readOnly = true)
     public Collection<UserChannelDto> getChannels(String userId) throws UserNotFoundException {
         var user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException(userId));
         var channels = userChannelRepository.findByUser1OrUser2(user, user);
         var channelList = channels.stream().toList();
 
         Collection<UserChannelDto> dtos = new LinkedList<>();
         for (UserChannel channel : channelList) {
             var lastMessage = userMessageRepository.findFirstByChannelOrderByCreatedAtDesc(channel)
-                .orElse(null);
+                    .orElse(null);
             dtos.add(channel.toDto(storageService, lastMessage));
         }
         return dtos;

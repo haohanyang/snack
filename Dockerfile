@@ -1,28 +1,26 @@
-FROM eclipse-temurin:17-jdk-focal as builder
+FROM amazoncorretto:17-alpine-jdk as builder
+WORKDIR /workspace/app
 
-COPY ./ /home/app
-
-WORKDIR /home/app
-
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs
-
-RUN npm install && npm run build
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src src
 
 RUN ./mvnw package -Dmaven.test.skip
 
-ARG JAR_FILE=target/*.jar
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
-COPY ${JAR_FILE} app.jar
 
-FROM eclipse-temurin:17-jre-focal as runner
-
-WORKDIR /app
-
-COPY --from=builder /home/app/app.jar app.jar
-
-COPY start.sh start.sh
+FROM amazoncorretto:17-alpine
+VOLUME /config
+ARG DEPENDENCY=/workspace/app/target/dependency
+COPY --from=builder ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=builder ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=builder ${DEPENDENCY}/BOOT-INF/classes /app
 
 EXPOSE 8080
 
-ENTRYPOINT [ "sh", "start.sh"]
+RUN addgroup -S appuser && adduser -S appuser -G appuser
+USER appuser
+
+ENTRYPOINT ["java", "-cp", "app:app/lib/*:app/classes", "snack.SnackApplication"]

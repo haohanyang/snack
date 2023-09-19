@@ -76,3 +76,7 @@ src/main/resources/static/site.webmanifest
 __pycache__/
 
 application-deploy.properties
+lambda/create_user/psycopg2
+test.py
+
+.vscode/

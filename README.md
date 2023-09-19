@@ -1,32 +1,42 @@
 # Snack
 
-Snack("chat" in Swedish) is a chat application built using Spring Boot and Spring Cloud's integration with AWS. The application enables
-real-time messaging and showcases the integration of Spring Cloud services with AWS. It allows users to communicate with
-each other in real-time, join chat rooms, and participate in separate discussions. The app serves as a foundation for
-more sophisticated chat applications and demonstrates the use of various Spring Cloud components on the AWS platform.
+Snack("chat" in Swedish) is a chat application built using the Ionic framework, React, Spring Boot, and AWS. The app can be easily installed on multiple devices as a PWA(Progressive Web App), thanks to Apple's support for the [Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API). The application enables real-time messaging and showcases the integration of the Spring Framework with AWS and the great potential of PWA as a full-fledged mobile application. It allows users to communicate with
+each other in real time, join chat rooms, participate in separate discussions, send multimedia content, and receive notifications. The client side code is on [snack-client](https://github.com/haohanyang/snack-client).
 
-## Demo
-![screenshot](src/main/resources/static/screenshot.png)
-A frontend-only demo is served on [Netlify](https://snack-demo.netlify.app/)
+
+iOS View|Android View
+:-------------------------:|:-------------------------:
+<img src="static/ss1.png" height=600>|  <img src="static/ss2.png" height=600>
+
+## Architecture
+![architecture](static/arch.svg)
+
+The app is hosted on AWS EC2, where a [caddy server](https://caddyserver.com) is used to serve the static frontend files and reverse proxy the API requests/WebSocket connections to the Dockerized Spring Boot application. The application also uses lots of other AWS services for object storage, authentication, etc.
 
 ## Features
-**Real-time messaging**: The app uses Spring's WebSocket messaging on STOMP protocol to enable real-time messaging. On the client-side, the app uses [StompJs](https://stomp-js.github.io/) and [SockJs](https://github.com/sockjs/sockjs-client) to connect to the WebSocket server.
+**Real-time messaging**: The app uses Spring's WebSocket messaging on STOMP protocol to enable real-time messaging. On the client-side, the app uses [StompJs](https://stomp-js.github.io/) to connect to the WebSocket server.
 
-**User authentication and authorization**: Users must create an account and log in to participate in chat conversations.
-The app uses Spring security's OAuth2 support to authenticate with AWS Cognito for identity and access management.
+**User authentication and authorization**: The app uses AWS Cognito for a JWT-based authentication and authorization. The client side uses AWS Amplify to interact with the Cognito service, and the server uses OAuth2 Resource Server to validate the JWT tokens from the clients. To synchronize the user data between Cognito user pool and SQL database, the app uses Cognito's sign-up triggers and invoke AWS Lambda functions to update the user entry.
 
-**Multimedia support**: Users can send and receive images in the chat messages. The service is enabled by Spring Cloud's
-S3 integration and AWS CloudFront for fast content delivering.
+**Multimedia support**: Users can send and receive images and other documents in the chat messages. The app uses AWS S3 to store the files and AWS Cloudfront to cache and deliver the files to the users.
 
-**RTK Query** The front-end largely uses [RTK Query](https://redux-toolkit.js.org/rtk-query/overview) for simplified
-data fetching and caching.
+**Push notifications**: The app uses Firebase Cloud Messaging and AWS SNS to send push notifications to the users when they are not actively using the app.
 
 ## Deployment
-Build the docker image 
+### Client side
+The download the dist file(GitHub Action Artifact) via `utils/download_client_artifacts.py` after setting the `GH_TOKEN` environment variable. The script will download the latest artifact and extract the dist file to the `/var/www/snack-website` folder, which is the target of the file server.
+### Server side
+First, build the docker image 
 ```
-docker build -t snack-app:v1 .
+docker build -t snack-server:v1 .
 ```
-In runtime, the app requires a property file `application-deploy.properties` with secrets to be mounted to the container.
+Before running the container, encrypt the secrets in the properties file using Jasypt
+```bash
+# Encrypt the properties file
+./mvnw jasypt:encrypt -Djasypt.plugin.path="file:/path/to/properties" -Djasypt.encryptor.password="password"
+
+# Run the container
+docker run -it --name snack-server-container --mount type=bind,source=/path/to/properties,target=/config/application.properties -p 8080:8080 -e spring_profiles_active=prod snack-server:v1 --spring.config.location=/config/application.properties --jasypt.encryptor.password="password"
 ```
-docker run -it -d --name snack-app-container --mount type=bind,source=/path/to/application-deploy.properties,target=/app/application-deploy.properties -p 8080:8080 snakc-app:v1
-```
+### Caddy server
+Checkout `caddy/Caddyfile` for caddy configuration
