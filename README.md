@@ -6,7 +6,7 @@ each other in real time, join chat rooms, participate in separate discussions, s
 
 iOS View|Android View
 :-------------------------:|:-------------------------:
-<img src="static/ss1.png" height=300>|  <img src="static/ss2.png" height=300>
+<img src="static/ss1.png" height=600>|  <img src="static/ss2.png" height=600>
 
 ## Architecture
 ![architecture](static/arch.svg)
